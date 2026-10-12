@@ -6,7 +6,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 
 import yt_dlp
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, jsonify, request, send_file, Response
 
 app = Flask(__name__, static_folder="static", static_url_path="")
 app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024  # cookies files are small
@@ -46,6 +46,17 @@ def save_cookies(folder):
 def valid_url(u):
     return u.startswith(("http://", "https://"))
 
+@app.get("/robots.txt")
+def robots():
+    body = "User-agent: *\nAllow: /\nDisallow: /api/\nSitemap: https://snag-downloader.onrender.com//sitemap.xml\n"
+    return Response(body, mimetype="text/plain")
+
+@app.get("/sitemap.xml")
+def sitemap():
+    pages = ["/", "/mp3-converter", "/playlist-downloader"]
+    urls = "".join(f"<url><loc>https://snag-downloader.onrender.com/{p}</loc></url>" for p in pages)
+    xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>'
+    return Response(xml, mimetype="application/xml")
 
 @app.post("/api/info")
 def info():
