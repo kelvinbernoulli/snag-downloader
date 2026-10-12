@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Link to file</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Public+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f2f4f1;
+        --ink: #16211c;
+        --muted: #5d6b64;
+        --line: #d3dad5;
+        --panel: #fff;
+        --accent: #0f6b4f;
+        --accent-ink: #fff;
+        --err: #b3261e;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #121815;
+          --ink: #e8eee9;
+          --muted: #93a29a;
+          --line: #2b3630;
+          --panel: #1a221e;
+          --accent: #4fc39a;
+          --accent-ink: #0b1712;
+          --err: #ff8a80;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          400 1rem/1.5 "Public Sans",
+          system-ui,
+          sans-serif;
+      }
+      main {
+        max-width: 34rem;
+        margin: 0 auto;
+        padding: 10vh 1.25rem 4rem;
+      }
+      h1 {
+        font:
+          700 clamp(2rem, 7vw, 3rem)/1.05 "Bricolage Grotesque",
+          system-ui,
+          sans-serif;
+        margin: 0 0 0.5rem;
+        letter-spacing: -0.02em;
+      }
+      h2 {
+        font:
+          700 1.15rem/1.3 "Bricolage Grotesque",
+          sans-serif;
+        margin: 0;
+      }
+      .lede {
+        color: var(--muted);
+        margin: 0 0 2rem;
+      }
+      .row {
+        display: flex;
+        gap: 0.5rem;
+      }
+      input[type="url"],
+      select {
+        flex: 1;
+        min-width: 0;
+        padding: 0.8rem 0.9rem;
+        border: 1.5px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        color: var(--ink);
+        font: inherit;
+      }
+      button {
+        padding: 0.8rem 1.1rem;
+        border: 0;
+        border-radius: 8px;
+        background: var(--accent);
+        color: var(--accent-ink);
+        font:
+          600 1rem "Public Sans",
+          sans-serif;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.55;
+        cursor: wait;
+      }
+      :focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 2px;
+      }
+      details {
+        margin: 0.9rem 0 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+      summary {
+        cursor: pointer;
+        color: var(--ink);
+      }
+      .hint {
+        margin: 0.5rem 0;
+      }
+      #status {
+        min-height: 1.5rem;
+        margin: 0.75rem 0;
+        color: var(--muted);
+      }
+      #status.error,
+      .err {
+        color: var(--err);
+      }
+      #result {
+        display: none;
+        background: var(--panel);
+        border: 1.5px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      #result img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 16/9;
+        object-fit: cover;
+        background: var(--line);
+      }
+      .body {
+        padding: 1rem 1.1rem 1.2rem;
+      }
+      #meta {
+        color: var(--muted);
+        margin: 0.2rem 0 1rem;
+        font-size: 0.9rem;
+      }
+      .opts {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.8rem;
+      }
+      .chk {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0 0 0.6rem;
+      }
+      .chk input {
+        width: 1.1rem;
+        height: 1.1rem;
+        accent-color: var(--accent);
+      }
+      #add {
+        width: 100%;
+        margin-top: 0.4rem;
+      }
+      #queuewrap {
+        margin-top: 2rem;
+      }
+      #queue {
+        list-style: none;
+        padding: 0;
+        margin: 0.75rem 0 0;
+        display: grid;
+        gap: 0.6rem;
+      }
+      #queue li {
+        background: var(--panel);
+        border: 1.5px solid var(--line);
+        border-radius: 8px;
+        padding: 0.7rem 0.9rem;
+      }
+      #queue .t {
+        font-weight: 600;
+        overflow-wrap: anywhere;
+      }
+      #queue progress {
+        width: 100%;
+        height: 0.5rem;
+        margin: 0.4rem 0 0.2rem;
+        accent-color: var(--accent);
+      }
+      #queue .s {
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+      #queue a {
+        color: var(--accent);
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Paste a link, get the file.</h1>
+      <p class="lede">
+        Works with any site yt-dlp supports. Only download what you have the
+        right to save.
+      </p>
+
+      <div class="row">
+        <input
+          id="url"
+          type="url"
+          placeholder="https://"
+          aria-label="Video or playlist link"
+          autocomplete="off"
+        />
+        <button id="lookup">Look up</button>
+      </div>
+      <details id="ck">
+        <summary>Video needs a login? Add cookies</summary>
+        <p class="hint">
+          Sign in to the site in your browser, export your cookies as a
+          cookies.txt file with an extension such as "Get cookies.txt LOCALLY",
+          then choose that file here. Treat it like a password: it's used for
+          the download only and deleted afterward.
+        </p>
+        <input id="cookies" type="file" accept=".txt" />
+      </details>
+      <div id="status" role="status" aria-live="polite"></div>
+
+      <section id="result" aria-label="Video details">
+        <img id="thumb" alt="" />
+        <div class="body">
+          <h2 id="title"></h2>
+          <p id="meta"></p>
+          <div class="opts">
+            <select id="kind" aria-label="Format">
+              <option value="video">Video (MP4)</option>
+              <option value="audio">Audio only (MP3)</option>
+            </select>
+            <select id="height" aria-label="Quality"></select>
+          </div>
+          <label class="chk" id="plrow" hidden
+            ><input type="checkbox" id="playlist" checked /><span
+              id="pltext"
+            ></span
+          ></label>
+          <label class="chk" id="subrow"
+            ><input type="checkbox" id="subs" /><span
+              >Include English subtitles (.srt)</span
+            ></label
+          >
+          <button id="add">Add to queue</button>
+        </div>
+      </section>
+
+      <section id="queuewrap" hidden>
+        <h2>Queue</h2>
+        <ul id="queue"></ul>
+      </section>
+    </main>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const status = (msg, err) => {
+        $("status").textContent = msg;
+        $("status").className = err ? "error" : "";
+      };
+      const fmtTime = (s) =>
+        s
+          ? `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`
+          : "";
+      let current = null;
+      const jobs = [];
+
+      function form(extra = {}) {
+        const f = new FormData();
+        f.append("url", $("url").value.trim());
+        const c = $("cookies").files[0];
+        if (c) f.append("cookies", c);
+        for (const [k, v] of Object.entries(extra)) f.append(k, v);
+        return f;
+      }
+      async function fail(r) {
+        const d = await r.json();
+        if (d.needs_cookies) $("ck").open = true;
+        throw new Error(d.error);
+      }
+
+      $("kind").onchange = () => {
+        const audio = $("kind").value === "audio";
+        $("height").style.display = audio ? "none" : "";
+        $("subrow").hidden = audio;
+      };
+
+      async function lookup() {
+        if (!$("url").value.trim()) return status("Paste a link first.", true);
+        $("lookup").disabled = true;
+        $("result").style.display = "none";
+        status("Looking up…");
+        try {
+          const r = await fetch("/api/info", { method: "POST", body: form() });
+          if (!r.ok) await fail(r);
+          const d = (current = await r.json());
+          $("thumb").src = d.thumbnail || "";
+          $("title").textContent = d.title || "Untitled";
+          $("meta").textContent = d.is_playlist
+            ? [d.uploader, `${d.total} videos`].filter(Boolean).join(", ")
+            : [d.uploader, fmtTime(d.duration)].filter(Boolean).join(", ");
+          $("height").innerHTML = d.heights.length
+            ? d.heights
+                .map((h) => `<option value="${h}">${h}p</option>`)
+                .join("")
+            : `<option value="">Best available</option>`;
+          $("plrow").hidden = !d.is_playlist;
+          $("pltext").textContent = d.is_playlist
+            ? `Whole playlist (${d.count} videos${d.total > d.count ? `, first ${d.count} of ${d.total}` : ""}), saved as a .zip`
+            : "";
+          $("result").style.display = "block";
+          status("");
+        } catch (e) {
+          status(e.message || "Something went wrong.", true);
+        }
+        $("lookup").disabled = false;
+      }
+
+      async function addToQueue() {
+        if (!adShown) {
+          window.open(AD_URL, "_blank", "noopener"); // must run before any await
+          adShown = true;
+          $("add").textContent = "Click again to start download";
+          status(
+            "A sponsored page opened in a new tab. Click again to start your download.",
+          );
+          return;
+        }
+        resetAdGate();
+      }
+
+      async function addToQueue() {
+        $("add").disabled = true;
+        try {
+          const r = await fetch("/api/jobs", {
+            method: "POST",
+            body: form({
+              kind: $("kind").value,
+              height: $("height").value,
+              playlist:
+                current?.is_playlist && $("playlist").checked ? "1" : "",
+              subs: $("subs").checked && $("kind").value === "video" ? "1" : "",
+            }),
+          });
+          if (!r.ok) await fail(r);
+          const { id } = await r.json();
+          const li = document.createElement("li");
+          li.innerHTML = `<div class="t"></div><progress max="100" value="0"></progress><div class="s">Waiting in queue…</div>`;
+          li.querySelector(".t").textContent = current?.title || "Download";
+          $("queue").prepend(li);
+          $("queuewrap").hidden = false;
+          jobs.push({ id, li, done: false });
+          status("Added to the queue.");
+        } catch (e) {
+          status(e.message || "Couldn't start the download.", true);
+        }
+        $("add").disabled = false;
+      }
+
+      async function poll() {
+        for (const j of jobs.filter((x) => !x.done)) {
+          const bar = j.li.querySelector("progress"),
+            s = j.li.querySelector(".s");
+          try {
+            const r = await fetch(`/api/jobs/${j.id}`);
+            const d = await r.json();
+            if (!r.ok) {
+              j.done = true;
+              s.textContent = d.error;
+              s.className = "s err";
+              continue;
+            }
+            bar.value = d.percent || 0;
+            if (d.status === "done") {
+              j.done = true;
+              const a = document.createElement("a");
+              a.href = `/api/jobs/${j.id}/file`;
+              a.textContent = `Save ${d.name}`;
+              a.download = "";
+              s.textContent = "";
+              s.append(a);
+              a.click();
+            } else if (d.status === "error") {
+              j.done = true;
+              s.textContent = d.error;
+              s.className = "s err";
+              if (d.needs_cookies) $("ck").open = true;
+            } else s.textContent = d.message || "Working…";
+          } catch {
+            /* network blip: try again next tick */
+          }
+        }
+      }
+
+      $("lookup").onclick = lookup;
+      $("url").onkeydown = (e) => {
+        if (e.key === "Enter") lookup();
+      };
+      $("add").onclick = addToQueue;
+      setInterval(poll, 1000);
+
+      const AD_URL = "https://your-ad-network-link-here";
+      let adShown = false;
+
+      function resetAdGate() {
+        adShown = false;
+        $("add").textContent = "Add to queue";
+      }
+    </script>
+  </body>
+</html>
